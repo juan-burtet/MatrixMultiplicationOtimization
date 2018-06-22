@@ -34,7 +34,7 @@ Para executar o código, insira:
   > gcc -march=native -O2 mult_mat_SIMD.c -o __executavelsimd__
 
 Para executar o código com as flags de vetorização automática, insira:
-  > gcc -funsafe-math-optimizations -march=native -O -ftree-vectorize -fopt-info-vec-optimized -fopt-info-vec-missed mult_mat_simples.c -o __executavelsimdsflags__
+  > gcc -funsafe-math-optimizations -march=native -O3 -ftree-vectorize -fopt-info-vec-optimized -fopt-info-vec-missed mult_mat_simples.c -o __executavelsimdflags__
 
 ## Informação do Valgrind
 
