@@ -34,7 +34,7 @@ MatrizC *alocar_matrizC(size_t qt);
 Matriz  *alocar_matriz(size_t qt);
 void     completar_matrizes(MatrizL *A, MatrizC *B);
 Matriz  *multiplica_matrizes_SIMD(MatrizL *A, MatrizC *B);
-int      soma_vec(intvec512 vetor);
+int      soma_vec(intvec512 *vetor);
 
 // Funcao Main
 int main (void){
@@ -123,7 +123,7 @@ Matriz  *multiplica_matrizes_SIMD(MatrizL *A, MatrizC *B){
   for(size_t i = 0; i < A->qt; i++){
     for(size_t j = 0; j < B->qt; j++){
       aux.vec = A->linhas[i].vec * B->colunas[j].vec;
-      Resultado->pos[i][j] = soma_vec(aux);
+      Resultado->pos[i][j] = soma_vec(&aux);
     }
   }
 
@@ -131,11 +131,11 @@ Matriz  *multiplica_matrizes_SIMD(MatrizL *A, MatrizC *B){
 }//multiplica_matrizes_SIMD
 
 // Soma todas os valores do vetor
-int soma_vec(intvec512 vetor){
+int soma_vec(intvec512 *vetor){
   int retorno = 0;
 
   for(size_t i = 0; i < SIZE; i++)
-    retorno += vetor.elem[i];
+    retorno += vetor->elem[i];
 
   return retorno;
 }
