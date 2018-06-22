@@ -1,34 +1,47 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define SIZE 512 // Precisa ser em Potencia de 2
 
-// Tipo para Vetorizacao
+// SIZE precisa ser em Potencia de 2
+#define SIZE 1024
+
+/** Union usada para vetorizacao
+  * vec - usado para instrucoes SIMD
+  * elem - elementos do vetor
+  */
 typedef union{
   int __attribute__((vector_size(SIZE*sizeof(int)))) vec;
   int elem[SIZE];
 } intvec512;
 
-// Conjunto com as Linhas da Matriz
+/** Struct de uma Matriz representada por N vetores (linhas)
+  * linhas - qt vetores que representam as linhas
+  * qt - quantidade de linhas
+  */
 typedef struct{
   intvec512 *linhas;
   size_t qt;
 } MatrizL;
 
-// Conjunto com as Colunas da Matriz
+/** Struct de uma Matriz representada por N vetores (colunas)
+  * colunas - qt vetores que representam as colunas
+  * qt - quantidade de colunas
+  */
 typedef struct{
   intvec512 *colunas;
   size_t qt;
 } MatrizC;
 
-// Matriz de 2 dimensoes de Inteiros
+/** Struct de uma Matriz quadrada
+  * pos - posicao da matriz
+  * qt - quantidade de linhas/colunas
+  */
 typedef struct{
   int **pos;
   size_t qt;
 } Matriz;
 
-//--------------------------------------------
-
+// Funcoes usadas no programa
 MatrizL *alocar_matrizL(size_t qt);
 MatrizC *alocar_matrizC(size_t qt);
 Matriz  *alocar_matriz(size_t qt);
@@ -36,12 +49,12 @@ void     completar_matrizes(MatrizL *A, MatrizC *B);
 Matriz  *multiplica_matrizes_SIMD(MatrizL *A, MatrizC *B);
 int      soma_vec(intvec512 *vetor);
 
-// Funcao Main
+/** Funcao Main
+  */
 int main (void){
   // Variaveis
   MatrizL *A = NULL;
   MatrizC *B = NULL;
-  Matriz  *Resultado = NULL;
 	clock_t c2, c1;
 	float tempo;
 
@@ -60,7 +73,8 @@ int main (void){
   c1 = clock();
 
   // Multiplicacao de Matrizes por Vetorizacao
-  Resultado = multiplica_matrizes_SIMD(A,B);
+  if(!multiplica_matrizes_SIMD(A,B))
+    exit(1);
 
   // tempo depois da funcao
   c2 = clock();
@@ -69,13 +83,16 @@ int main (void){
   tempo = (c2 - c1)*1000/CLOCKS_PER_SEC;
 
   // imprime o tempo
-  printf("tempo do simd: %.0fms\n", tempo);
+  printf("tempo usando SIMD: %.0fms\n", tempo);
 
   // finaliza o programa
   return 0;
 }//main
 
-// Aloca matriz das Linhas
+/** Funcao que aloca uma matrizL(representada por linhas)
+  * @param qt - quantidade de linhas
+  * @return - Matriz de Linhas alocada
+  */
 MatrizL *alocar_matrizL(size_t qt){
   MatrizL *matriz = malloc(sizeof(MatrizL));
   matriz->linhas = malloc(qt * sizeof(intvec512));
@@ -83,7 +100,10 @@ MatrizL *alocar_matrizL(size_t qt){
   return matriz;
 }//alocar_matrizL
 
-// Aloca matriz das colunas
+/** Funcao que aloca uma matrizC(representada por colunas)
+  * @param qt - quantidade de colunas
+  * @return - Matriz de colunas alocada
+  */
 MatrizC *alocar_matrizC(size_t qt){
   MatrizC *matriz = malloc(sizeof(MatrizC));
   matriz->colunas = malloc(qt * sizeof(intvec512));
@@ -91,8 +111,11 @@ MatrizC *alocar_matrizC(size_t qt){
   return matriz;
 }//alocar_matrizC
 
-// Aloca matriz de duas dimensoes de inteiros
-Matriz  *alocar_matriz(size_t qt){
+/** Funcao que aloca uma matriz quadrada
+  * @param qt - quantidade de linhas/colunas
+  * @return retorna uma matriz quadrada
+  */
+Matriz *alocar_matriz(size_t qt){
   Matriz *matriz = malloc(sizeof(Matriz));
   matriz->pos = malloc(qt * sizeof(int *));
   matriz->qt = qt;
@@ -101,8 +124,12 @@ Matriz  *alocar_matriz(size_t qt){
   return matriz;
 }//alocar_matriz
 
-// Adiciona valores para as Matrizes
-void     completar_matrizes(MatrizL *A, MatrizC *B){
+/** Funcao que adiciona valores a Matriz de Linhas e a
+  Matriz de colunas
+  * @param A - Matriz de Linhas
+  * @param B - Matriz de Colunas
+  */
+void completar_matrizes(MatrizL *A, MatrizC *B){
   for(size_t i = 0; i < A->qt; i++){
     for(size_t j = 0; j < B->qt; j++){
       A->linhas[i].elem[j]  = (i * A->qt) + 2*j;
@@ -111,7 +138,11 @@ void     completar_matrizes(MatrizL *A, MatrizC *B){
   }
 }//completar_matrizes
 
-// Multiplica as matrizes com vetorizacao
+/** Funcao que faz a Multiplicacao de Matrizes com instrucoes SIMD
+  * @param A - Matriz de Linhas
+  * @param B - Matriz de Colunas
+  * @return Matriz quadrada multiplicada
+  */
 Matriz  *multiplica_matrizes_SIMD(MatrizL *A, MatrizC *B){
   // Vetor auxiliar
   intvec512 aux;
@@ -120,22 +151,28 @@ Matriz  *multiplica_matrizes_SIMD(MatrizL *A, MatrizC *B){
   Matriz *Resultado = alocar_matriz(A->qt);
 
   // Multiplicacao de Matrizes utilizando vetorizacao
-  for(size_t i = 0; i < A->qt; i++){
+  for(size_t i = 0; i < A->qt; i++)
     for(size_t j = 0; j < B->qt; j++){
       aux.vec = A->linhas[i].vec * B->colunas[j].vec;
       Resultado->pos[i][j] = soma_vec(&aux);
     }
-  }
 
+  // retorna a matriz multiplicada
   return Resultado;
 }//multiplica_matrizes_SIMD
 
-// Soma todas os valores do vetor
+/** Funcao que soma todas as posicoes de um vetor(vetorizacao)
+  * @param vetor - vetor(vetorizacao)
+  * @return soma de todos as posicoes do vetor
+  */
 int soma_vec(intvec512 *vetor){
+  // variavel inicializada em 0
   int retorno = 0;
 
+  // soma de todas as posicoes
   for(size_t i = 0; i < SIZE; i++)
     retorno += vetor->elem[i];
 
+  // retorna a soma
   return retorno;
-}
+}//soma_vec

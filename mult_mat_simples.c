@@ -1,30 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <omp.h>
-#define LIM 512
+#define LIM 1024
 
-struct Matrix{
+/** Struct de uma Matriz
+	* pos - indica a posição na matriz
+	* linhas - quantidade de linhas
+	* colunas - quantidade de colunas
+	*/
+typedef struct {
 	int **pos;
 	size_t linhas;
 	size_t colunas;
-};
+}Matriz;
 
-typedef struct Matrix Matriz;
-
+// Funcoes usadas no programa
 Matriz *alocar_matriz(size_t linhas, size_t colunas);
 Matriz *multiplica_matrizes(Matriz *A, Matriz *B);
-Matriz *multiplica_matrizes_paralelo(Matriz *A, Matriz *B);
-void    print_matrix(Matriz *imprime);
 void    complete_matrix(Matriz *A, Matriz *B);
-void    compare_matrix(Matriz *A, Matriz *B);
 
+/** Funcao Main
+	*/
 int main(void) {
 	// Variaveis
 	Matriz *A = NULL;
 	Matriz *B = NULL;
-	Matriz *sequencial = NULL;
-	Matriz *paralelo   = NULL;
 	clock_t c2, c1;
 	float tempo;
 
@@ -35,14 +35,18 @@ int main(void) {
 	// Adiciona valores para elas
 	complete_matrix(A,B);
 
-	// Imprime a quantidade de Linhas e Colunas
-	printf("Tamanho Linhas/Colunas = %d\n", LIM);
+	// Imprime informacoes
+	printf("UTILIZANDO O ALGORITMO TRIVIAL\n");
+	printf("Quantidade de Linhas/Colunas = %d\n", LIM);
 
 	// Pegar o tempo antes da funcao
 	c1 = clock();
 
-	// Multiplicacao de Matrizes de forma sequencial
-	sequencial = multiplica_matrizes(A,B);
+	// Multiplicacao de Matrizes
+	if(!multiplica_matrizes(A,B)){
+		printf("Matrizes incompativeis.\n");
+		exit(1);
+	}//if
 
 	// tempo depois da funcao
 	c2 = clock();
@@ -57,25 +61,36 @@ int main(void) {
   return 0;
 }//main
 
-// Funçao que aloca uma matriz com n linhas e m colunas
+/** Função que aloca uma matriz de n linhas e m colunas
+	* @param linhas - quantidade de linhas
+	* @param colunas - quantidade de colunas
+	* @return Matriz linhasXcolunas
+	*/
 Matriz *alocar_matriz(size_t linhas, size_t colunas){
+	// Aloca o espaco da struct matriz
 	Matriz *matriz = malloc(sizeof(Matriz));
 
+	// adiciona a quantidade de linhas e colunas
 	matriz->linhas  = linhas;
 	matriz->colunas = colunas;
 
+	// Aloca a quantidade de linhas e colunas
 	matriz->pos = malloc(linhas * sizeof(int *));
 	for(size_t i = 0; i < linhas; i++)
 		matriz->pos[i] = calloc(colunas, sizeof(int));
 
+	// Retorna a matriz
 	return matriz;
 }//alocar_matriz
 
-// Multiplicacao de Matrizes de forma sequencial
+/** Função que faz a multiplicacao de matrizes
+	* @param A - Matriz A
+	* @param B - Matriz B
+	* @return - Retorna a Matriz Multiplicada
+	*/
 Matriz *multiplica_matrizes(Matriz *A, Matriz *B){
-
-  // Se as Linhas de A e as Colunas de B
-  // forem diferentes, nao pode multiplicar
+	/* Se as linhas de A forem diferentes das colunas de B,
+	não pode multiplicar as matrizes */
   if(A->linhas != B->colunas)
     return NULL;
 
@@ -90,72 +105,20 @@ Matriz *multiplica_matrizes(Matriz *A, Matriz *B){
 
   // Retorna a Matriz Resultado
   return Resultado;
-}
+}//multiplica_matrizes
 
-// Multiplicação de Matrizes de forma paralela!
-Matriz *multiplica_matrizes_paralelo(Matriz *A, Matriz *B){
-  // Se as Linhas de A e as Colunas de B
-  // forem diferentes, não pode multiplicar
-  if(A->linhas != B->colunas)
-    return NULL;
-
-  // Aloca na Memoria onde sera armazenado a Matriz Resultado
-  Matriz *Resultado = alocar_matriz(A->linhas, B->colunas);
-
- 	// Multiplicacao de Matrizes
- 	#pragma omp parallel for
-  for(size_t i = 0; i < A->linhas; ++i)
-    for(size_t j = 0; j < B->colunas; ++j)
-      for(size_t k = 0; k < A->colunas; ++k)
-        Resultado->pos[i][j] += A->pos[i][k] * B->pos[k][j];
-
-  // Retorna a Matriz Resultado
-  return Resultado;
-}//mult_matrix
-
-void print_matrix(Matriz *imprime){
-	if(imprime){
-		for(size_t i = 0; i < imprime->linhas; i++){
-			for(size_t j = 0; j < imprime->colunas; j++){
-				printf("%d ", imprime->pos[i][j]);
-			}
-			printf("\n");
-		}
-		return;
-	}
-
-	printf("Matriz Nula!\n");
-	return;
-}//print_matrix
-
-// Funcao que insere valores em duas matrizes
+/** Função que adiciona valores as Matrizes A e B
+	* @param A - Matriz A
+	* @param B - Matriz B
+	*/
 void complete_matrix(Matriz *A, Matriz *B){
+	// Adiciona valores a Matriz A
 	for(size_t i = 0; i < A->linhas; i++)
 		for(size_t j = 0; j < A->colunas; j++)
 			A->pos[i][j] = (i * A->colunas) + 2*j;
 
+	// Adiciona valores a Matriz B
 	for(size_t i = 0; i < B->linhas; i++)
 		for(size_t j = 0; j < B->colunas; j++)
 			B->pos[i][j] = (i * B->colunas) + (2*j) + 1;
-
-	return;
 }//complete_matrix
-
-void compare_matrix(Matriz *A, Matriz *B){
-	if(A->linhas != B->linhas || A->colunas != B->colunas){
-		printf("Matrizes diferentes!\n");
-		return;
-	}
-
-	for(size_t i = 0; i < A->linhas; i++){
-		for(size_t j = 0; j < A->colunas; j++){
-			if(A->pos[i][j] != B->pos[i][j]){
-				printf("Matrizes diferentes!\n");
-				return;
-			}
-		}
-	}
-
-	printf("Matrizes Iguais!\n");
-	return;
-}
