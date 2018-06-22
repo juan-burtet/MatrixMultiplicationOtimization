@@ -48,6 +48,9 @@ Matriz  *alocar_matriz(size_t qt);
 void     completar_matrizes(MatrizL *A, MatrizC *B);
 Matriz  *multiplica_matrizes_SIMD(MatrizL *A, MatrizC *B);
 int      soma_vec(intvec512 *vetor);
+void     free_matrizL(MatrizL *destroy);
+void     free_matrizC(MatrizC *destroy);
+void     free_matriz(Matriz *destroy);
 
 /** Funcao Main
   */
@@ -55,6 +58,7 @@ int main (void){
   // Variaveis
   MatrizL *A = NULL;
   MatrizC *B = NULL;
+  Matriz  *Resultado = NULL;
 	clock_t c2, c1;
 	float tempo;
 
@@ -73,8 +77,7 @@ int main (void){
   c1 = clock();
 
   // Multiplicacao de Matrizes por Vetorizacao
-  if(!multiplica_matrizes_SIMD(A,B))
-    exit(1);
+  Resultado = multiplica_matrizes_SIMD(A,B);
 
   // tempo depois da funcao
   c2 = clock();
@@ -84,6 +87,11 @@ int main (void){
 
   // imprime o tempo
   printf("tempo usando SIMD: %.0fms\n", tempo);
+
+  // desaloca as matrizes
+  free_matrizL(A);
+  free_matrizC(B);
+  free_matriz(Resultado);
 
   // finaliza o programa
   return 0;
@@ -176,3 +184,29 @@ int soma_vec(intvec512 *vetor){
   // retorna a soma
   return retorno;
 }//soma_vec
+
+/** Funcao que desaloca uma matriz de linhas
+  * @param destroy - matriz de linhas
+  */
+void free_matrizL(MatrizL *destroy){
+  free(destroy->linhas);
+  free(destroy);
+}//free_matrizL
+
+/** Funcao que deloca uma matriz de colunas
+  * @param destroy - matriz de colunas
+  */
+void free_matrizC(MatrizC *destroy){
+  free(destroy->colunas);
+  free(destroy);
+}//free_matrizC
+
+/** Funcao que desaloca uma matriz quadrada
+  * @param destroy - matriz quadrada
+  */
+void free_matriz(Matriz *destroy){
+  for(size_t i = 0; i < destroy->qt; i++)
+    free(destroy->pos[i]);
+  free(destroy->pos);
+  free(destroy);
+}//free_matriz

@@ -18,6 +18,7 @@ typedef struct {
 Matriz *alocar_matriz(size_t linhas, size_t colunas);
 Matriz *multiplica_matrizes(Matriz *A, Matriz *B);
 void    complete_matrix(Matriz *A, Matriz *B);
+void    free_matriz(Matriz *destroy);
 
 /** Funcao Main
 	*/
@@ -25,6 +26,7 @@ int main(void) {
 	// Variaveis
 	Matriz *A = NULL;
 	Matriz *B = NULL;
+	Matriz *Resultado = NULL;
 	clock_t c2, c1;
 	float tempo;
 
@@ -43,10 +45,7 @@ int main(void) {
 	c1 = clock();
 
 	// Multiplicacao de Matrizes
-	if(!multiplica_matrizes(A,B)){
-		printf("Matrizes incompativeis.\n");
-		exit(1);
-	}//if
+	Resultado = multiplica_matrizes(A,B);
 
 	// tempo depois da funcao
 	c2 = clock();
@@ -56,6 +55,11 @@ int main(void) {
 
 	// imprime o tempo na tela
 	printf("tempo do sequencial: %.0fms\n", tempo);
+
+	// desaloca as matrizes da memoria
+	free_matriz(A);
+	free_matriz(B);
+	free_matriz(Resultado);
 
 	// Finaliza o programa
   return 0;
@@ -122,3 +126,13 @@ void complete_matrix(Matriz *A, Matriz *B){
 		for(size_t j = 0; j < B->colunas; j++)
 			B->pos[i][j] = (i * B->colunas) + (2*j) + 1;
 }//complete_matrix
+
+/** Funcao que desaloca a matriz da memoria
+	* @param destroy - matriz a ser desalocada
+	*/
+void free_matriz(Matriz *destroy){
+	for(size_t i = 0; i < destroy->linhas; i++)
+		free(destroy->pos[i]);
+	free(destroy->pos);
+	free(destroy);
+}//free_matriz
