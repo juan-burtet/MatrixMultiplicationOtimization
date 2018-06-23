@@ -41,3 +41,15 @@ Para executar o código com as flags de vetorização automática, insira:
 \- | Simples | Simples + Flags | SIMD | SIMD + Flags
 -- | ------- | --------------- | ---- | ------------
 Bytes Alocados | 12,608,584 | 12,608,584 | 12,592,176 | 12,608,584
+
+### Simples
+<img src="simples.png" width="900px">
+
+### Simples + Flags
+<img src="simplesflags.png" width="900px">
+
+### SIMD
+<img src="simd.png" width="900px">
+
+### SIMD + Flags
+<img src="simdflags.png" width="900px">
