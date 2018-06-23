@@ -11,10 +11,19 @@ Arquivos no repositório:
     > Arquivo com as informações do Valgrind no teste Simples
   * [simplesflags.txt](https://github.com/juan-burtet/MatrixMultiplicationOtimization/blob/master/simplesflags.txt)
     > Arquivo com as informações do Valgrind no teste Simples utilizando as flags do compilador
-  * [simd.txt](https://github.com/juan-burtet/MatrixMultiplicationOtimization/blob/master/sim.txt)
+  * [simd.txt](https://github.com/juan-burtet/MatrixMultiplicationOtimization/blob/master/simd.txt)
     > Arquivo com as informações do Valgrind no teste utilizando instruções SIMD
-  * [simd.txt](https://github.com/juan-burtet/MatrixMultiplicationOtimization/blob/master/sim.txt)
+  * [simdflags.txt](https://github.com/juan-burtet/MatrixMultiplicationOtimization/blob/master/simdflags.txt)
     > Arquivo com as informações do Valgrind no teste utilizando instruções SIMD + flags do compilador
+  * [simples.png](https://github.com/juan-burtet/MatrixMultiplicationOtimization/blob/master/simples.png)
+    > Imagem com as informações do Valgrind no teste Simples
+  * [simplesflags.png](https://github.com/juan-burtet/MatrixMultiplicationOtimization/blob/master/simplesflags.png)
+    > Imagem com as informações do Valgrind no teste Simples utilizando as flags do compilador
+  * [simd.png](https://github.com/juan-burtet/MatrixMultiplicationOtimization/blob/master/simd.png)
+    > Imagem com as informações do Valgrind no teste utilizando instruções SIMD
+  * [simdflags.png](https://github.com/juan-burtet/MatrixMultiplicationOtimization/blob/master/simdflags.png)
+    > Imagem com as informações do Valgrind no teste utilizando instruções SIMD + flags do compilador
+
 
 ## mult_mat_simples.c
 
@@ -36,7 +45,13 @@ Para executar o código, insira:
 Para executar o código com as flags de vetorização automática, insira:
   > gcc -funsafe-math-optimizations -march=native -O3 -ftree-vectorize -fopt-info-vec-optimized -fopt-info-vec-missed mult_mat_simples.c -o __executavelsimdflags__
 
-## Informação do Valgrind
+## Diferença de tempo
+
+\- | Simples | Simples + Flags | SIMD | SIMD + Flags
+-- | ------- | --------------- | ---- | ------------
+Tempo (ms) | 11.489 | 2.030 | 902 | 2.021
+
+## Informação de Memória no Valgrind
 
 \- | Simples | Simples + Flags | SIMD | SIMD + Flags
 -- | ------- | --------------- | ---- | ------------
