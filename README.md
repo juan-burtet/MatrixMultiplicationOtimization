@@ -38,6 +38,6 @@ Para executar o código com as flags de vetorização automática, insira:
 
 ## Informação do Valgrind
 
-oi | Simples | Simples + Flags | SIMD | SIMD + Flags
-- | - | - | - | -
+- | Simples | Simples + Flags | SIMD | SIMD + Flags
+- | ------- | --------------- | ---- | ------------
 Bytes Alocados | 12,608,584 | 12,608,584 | 12,592,176 | 12,608,584
